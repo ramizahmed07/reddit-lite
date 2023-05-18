@@ -6,14 +6,15 @@ import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { buildSchema } from "type-graphql";
 
 import config from "./mikro-orm.config";
-import { PostResolver } from "./resolvers/PostResolver";
+import { PostResolver } from "./resolvers/post";
+import { UserResolver } from "./resolvers/user";
 
 const main = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(config);
   const em = orm.em.fork();
 
   const schema = await buildSchema({
-    resolvers: [PostResolver],
+    resolvers: [PostResolver, UserResolver],
   });
 
   const server = new ApolloServer({
@@ -24,7 +25,6 @@ const main = async () => {
     listen: { port: 4000 },
     context: (): any => ({ em }),
   });
-
   console.log(`🚀  Server ready at: ${url}`);
 };
 

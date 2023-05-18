@@ -4,9 +4,10 @@ import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
 
 import { __prod__ } from "./constants";
 import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 
 const config: Options<PostgreSqlDriver> = {
-  entities: [Post],
+  entities: [Post, User],
   dbName: "reddit-lite",
   type: "postgresql",
   user: "postgres",
