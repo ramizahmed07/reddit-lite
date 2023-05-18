@@ -5,7 +5,6 @@ import { MikroORM } from "@mikro-orm/core";
 import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { buildSchema } from "type-graphql";
 
-import { Post } from "./entities/Post";
 import config from "./mikro-orm.config";
 import { PostResolver } from "./resolvers/PostResolver";
 
@@ -13,8 +12,6 @@ const main = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(config);
   const em = orm.em.fork();
 
-  const posts = await em.find(Post, {});
-  console.log(posts);
   const schema = await buildSchema({
     resolvers: [PostResolver],
   });
