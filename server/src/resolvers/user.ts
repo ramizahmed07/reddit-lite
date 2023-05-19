@@ -6,6 +6,7 @@ import {
   Field,
   ArgsType,
   ObjectType,
+  Query,
 } from "type-graphql";
 import argon2 from "argon2";
 
@@ -48,6 +49,13 @@ function setError(field: string, message: string): FieldError {
 
 @Resolver(User)
 export class UserResolver {
+  @Query((_returns) => User, { nullable: true })
+  async me(@Ctx() { em, req }: MyContext) {
+    if (!req.session.userId) return null;
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
   @Mutation((_returns) => UserResponse)
   async register(
     @Args() { username, password }: RegisterUserInput,
@@ -79,7 +87,7 @@ export class UserResolver {
   @Mutation((_returns) => UserResponse)
   async login(
     @Args() { username, password }: RegisterUserInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username });
     if (!user) {
@@ -94,7 +102,7 @@ export class UserResolver {
         errors: [setError("password", "incorrect password")],
       };
     }
-
+    req.session.userId = user.id;
     return { user };
   }
 }

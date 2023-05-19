@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import http from "http";
 import express from "express";
+import RedisStore from "connect-redis";
+import session from "express-session";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { expressMiddleware } from "@apollo/server/express4";
@@ -8,9 +10,11 @@ import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { MikroORM } from "@mikro-orm/core";
 import { buildSchema } from "type-graphql";
 import { json } from "body-parser";
+import { createClient } from "redis";
 
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import { __prod__ } from "./constants";
 import config from "./mikro-orm.config";
 
 const main = async () => {
@@ -32,11 +36,33 @@ const main = async () => {
 
   await server.start();
 
+  const redisClient = createClient();
+  redisClient.connect().catch(console.error);
+
+  app.use(
+    session({
+      name: "sid",
+      store: new (RedisStore as any)({
+        client: redisClient,
+        disableTouch: true,
+      }),
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+        httpOnly: true,
+        sameSite: "lax", // csrf
+        secure: __prod__, // cookie only works in https
+      },
+      resave: false,
+      saveUninitialized: false,
+      secret: "sdlkfjdsklfjdslkf",
+    })
+  );
+
   app.use(
     "/graphql",
     json(),
     expressMiddleware(server, {
-      context: (): any => ({ em }),
+      context: ({ req, res }): any => ({ em, req, res }),
     })
   );
 
