@@ -2,6 +2,7 @@ import "reflect-metadata";
 import http from "http";
 import express from "express";
 import RedisStore from "connect-redis";
+import cors from "cors";
 import session from "express-session";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
@@ -14,7 +15,7 @@ import { createClient } from "redis";
 
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
-import { __prod__ } from "./constants";
+import { COOKIE_NAME, __prod__ } from "./constants";
 import config from "./mikro-orm.config";
 
 const main = async () => {
@@ -40,16 +41,23 @@ const main = async () => {
   redisClient.connect().catch(console.error);
 
   app.use(
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
+  );
+
+  app.use(
     session({
-      name: "sid",
+      name: COOKIE_NAME,
       store: new (RedisStore as any)({
         client: redisClient,
         disableTouch: true,
       }),
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+        maxAge: 10 * 365 * 24 * 60 * 60 * 1000, // 10 years
         httpOnly: true,
-        sameSite: "lax", // csrf
+        sameSite: "strict", // csrf
         secure: __prod__, // cookie only works in https
       },
       resave: false,

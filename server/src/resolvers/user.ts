@@ -12,6 +12,7 @@ import argon2 from "argon2";
 
 import { User } from "../entities/User";
 import { MyContext } from "src/types";
+import { COOKIE_NAME } from "../constants";
 
 @ArgsType()
 class RegisterUserInput {
@@ -49,6 +50,11 @@ function setError(field: string, message: string): FieldError {
 
 @Resolver(User)
 export class UserResolver {
+  @Query((_returns) => [User])
+  users(@Ctx() { em }: MyContext): Promise<User[]> {
+    return em.find(User, {});
+  }
+
   @Query((_returns) => User, { nullable: true })
   async me(@Ctx() { em, req }: MyContext) {
     if (!req.session.userId) return null;
@@ -59,7 +65,7 @@ export class UserResolver {
   @Mutation((_returns) => UserResponse)
   async register(
     @Args() { username, password }: RegisterUserInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     if (username.length <= 2)
       return {
@@ -81,6 +87,8 @@ export class UserResolver {
         };
       }
     }
+
+    req.session.userId = user.id;
     return { user };
   }
 
@@ -104,5 +112,19 @@ export class UserResolver {
     }
     req.session.userId = user.id;
     return { user };
+  }
+
+  @Mutation((_returns) => Boolean)
+  async logout(@Ctx() { req, res }: MyContext) {
+    return new Promise((resolve) =>
+      req.session.destroy((err) => {
+        if (err) {
+          console.log(err);
+          return resolve(false);
+        }
+        res.clearCookie(COOKIE_NAME);
+        resolve(true);
+      })
+    );
   }
 }
