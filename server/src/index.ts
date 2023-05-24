@@ -17,6 +17,7 @@ import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import config from "./mikro-orm.config";
+import { User } from "./entities/User";
 
 const main = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(config);
