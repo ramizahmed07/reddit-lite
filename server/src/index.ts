@@ -11,13 +11,12 @@ import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
 import { MikroORM } from "@mikro-orm/core";
 import { buildSchema } from "type-graphql";
 import { json } from "body-parser";
-import { createClient } from "redis";
+import Redis from "ioredis";
 
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import config from "./mikro-orm.config";
-import { User } from "./entities/User";
 
 const main = async () => {
   const orm = await MikroORM.init<PostgreSqlDriver>(config);
@@ -37,9 +36,9 @@ const main = async () => {
   });
 
   await server.start();
+  const redis = new Redis();
 
-  const redisClient = createClient();
-  redisClient.connect().catch(console.error);
+  redis.connect().catch(console.error);
 
   app.use(
     cors({
@@ -52,7 +51,7 @@ const main = async () => {
     session({
       name: COOKIE_NAME,
       store: new (RedisStore as any)({
-        client: redisClient,
+        client: redis,
         disableTouch: true,
       }),
       cookie: {
@@ -71,7 +70,7 @@ const main = async () => {
     "/graphql",
     json(),
     expressMiddleware(server, {
-      context: ({ req, res }): any => ({ em, req, res }),
+      context: ({ req, res }): any => ({ em, req, res, redis }),
     })
   );
 

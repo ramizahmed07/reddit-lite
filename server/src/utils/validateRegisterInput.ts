@@ -9,11 +9,11 @@ export function validateRegisterInput({
   if (!validateEmail(email))
     return [{ field: "email", message: "Email must be valid" }];
 
-  if (username.length <= 2)
-    return [{ field: "username", message: "length must be greater than 2" }];
+  if (username.length <= 4)
+    return [{ field: "username", message: "length must be greater than 4" }];
 
-  if (password.length <= 3)
-    return [{ field: "password", message: "length must be greater than 3" }];
+  if (password.length <= 5)
+    return [{ field: "password", message: "length must be greater than 5" }];
 
   return null;
 }
