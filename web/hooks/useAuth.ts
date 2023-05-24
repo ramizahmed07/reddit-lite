@@ -11,18 +11,19 @@ import {
 } from "@/gql/graphqlcomponents";
 import { client } from "@/lib/clientcomponents";
 
-interface UserInput {
-  username: string;
-  password: string;
-}
-
 export const useAuth = () => {
   const [errors, setErrors] = useState<FieldError[] | null>(null);
   const router = useRouter();
 
-  const login = async ({ username, password }: UserInput) => {
+  const login = async ({
+    usernameOrEmail,
+    password,
+  }: {
+    usernameOrEmail: string;
+    password: string;
+  }) => {
     const { login } = await client.request(LoginDocument, {
-      username,
+      usernameOrEmail,
       password,
     });
 
@@ -34,10 +35,17 @@ export const useAuth = () => {
     }
   };
 
-  const register = async ({ username, password }: UserInput) => {
+  const register = async ({
+    username,
+    email,
+    password,
+  }: {
+    username: string;
+    email: string;
+    password: string;
+  }) => {
     const { register } = await client.request(RegisterDocument, {
-      username,
-      password,
+      options: { email, username, password },
     });
     if (register?.errors) {
       setErrors(register?.errors as FieldError[]);

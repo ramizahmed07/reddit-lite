@@ -3,12 +3,27 @@
 import { useAuth } from "@/hooks/useAuthcomponents";
 import { useState, ChangeEvent } from "react";
 
+interface LoginUserInput {
+  usernameOrEmail: string;
+  password: string;
+}
+
+interface RegisterUserInput {
+  username: string;
+  email: string;
+  password: string;
+}
+
 const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
   const { errors, login, register } = useAuth();
-  const [inputs, setInputs] = useState({
-    username: "",
-    password: "",
-  });
+  const [inputs, setInputs] = useState<LoginUserInput | RegisterUserInput>(
+    isSignIn
+      ? {
+          usernameOrEmail: "",
+          password: "",
+        }
+      : { email: "", username: "", password: "" }
+  );
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setInputs({
@@ -19,9 +34,9 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
 
   const handleSubmit = async () => {
     if (isSignIn) {
-      login(inputs);
+      login(inputs as LoginUserInput);
     } else {
-      register(inputs);
+      register(inputs as RegisterUserInput);
     }
   };
 
@@ -30,19 +45,42 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
 
   return (
     <>
+      {!isSignIn && (
+        <div className="field w-full mb-5">
+          <label>
+            <p className="font-bold pb-2">Email</p>
+            <input
+              className="w-full p-3 font-light bg-primary  rounded-md outline-none"
+              type="email"
+              name="email"
+              placeholder="email"
+              onChange={handleChange}
+              value={(inputs as RegisterUserInput).email}
+            />
+          </label>
+        </div>
+      )}
+
       <div className="field w-full mb-5">
         <label>
-          <p className="font-bold pb-2">Username</p>
+          <p className="font-bold pb-2">
+            {renderContent("Username or Email", "Username")}
+          </p>
           <input
             className="w-full p-3 font-light bg-primary  rounded-md outline-none"
             type="text"
-            name="username"
-            placeholder="Username"
+            name={renderContent("usernameOrEmail", "username")}
+            placeholder={renderContent("username or email", "ssername")}
             onChange={handleChange}
-            value={inputs.username}
+            value={
+              isSignIn
+                ? (inputs as LoginUserInput).usernameOrEmail!
+                : (inputs as RegisterUserInput).username
+            }
           />
         </label>
       </div>
+
       <div className="field w-full mb-5">
         <label>
           <p className="font-bold pb-2">Password</p>
@@ -50,7 +88,7 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
             className="w-full p-3 font-light bg-primary  rounded-md outline-none"
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="password"
             onChange={handleChange}
             value={inputs.password}
           />
@@ -63,7 +101,9 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
         {renderContent("Login", "Register")}
       </button>
       {errors?.length ? (
-        <div className="text-red-700 font-bold p-2 rounded-md w-full border-2 border-red-700 ">{`${errors[0].field}: ${errors[0].message}`}</div>
+        <div className="text-red-700 font-bold p-2 rounded-md w-full border-2 border-red-700 ">{`${
+          errors[0].field ? `${errors[0].field}:` : ""
+        }  ${errors[0].message}`}</div>
       ) : null}
     </>
   );
