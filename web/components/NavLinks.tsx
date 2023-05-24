@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import { useMe } from "@/hooks/useMecomponents";
 import { useAuth } from "@/hooks/useAuthcomponents";
 
 const NavLinks = () => {
+  const params = useParams();
   const { data, isLoading } = useMe();
   const { logout } = useAuth();
 
+  if (params?.token) return null;
   if (isLoading) {
     return null;
   } else if (!data?.me) {

@@ -1,7 +1,9 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuthcomponents";
+import { extractErrorMessage } from "@/utils/extractErrorMessagecomponents";
 import { useState, ChangeEvent } from "react";
+import FormMessage from "./FormMessage";
 
 interface LoginUserInput {
   usernameOrEmail: string;
@@ -100,11 +102,12 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
       >
         {renderContent("Login", "Register")}
       </button>
-      {errors?.length ? (
-        <div className="text-red-700 font-bold p-2 rounded-md w-full border-2 border-red-700 ">{`${
-          errors[0].field ? `${errors[0].field}:` : ""
-        }  ${errors[0].message}`}</div>
-      ) : null}
+
+      <FormMessage
+        visible={errors !== null && errors?.length !== 0}
+        type={"error"}
+        message={extractErrorMessage(errors!)}
+      />
     </>
   );
 };

@@ -3,7 +3,9 @@ import { useRouter } from "next/navigation";
 import { mutate } from "swr";
 
 import {
+  ChangePasswordDocument,
   FieldError,
+  ForgotPasswordDocument,
   LoginDocument,
   LogoutDocument,
   MeDocument,
@@ -26,7 +28,6 @@ export const useAuth = () => {
       usernameOrEmail,
       password,
     });
-
     if (login?.errors) {
       setErrors(login?.errors as FieldError[]);
     } else {
@@ -62,10 +63,38 @@ export const useAuth = () => {
     }
   };
 
+  const forgotPassword = async (variables: { email: string }) => {
+    const { forgotPassword } = await client.request(
+      ForgotPasswordDocument,
+      variables
+    );
+    if (!forgotPassword)
+      setErrors([{ field: "", message: "Something went wrong" }]);
+    return forgotPassword;
+  };
+
+  const changePassword = async (variables: {
+    token: string;
+    newPassword: string;
+  }) => {
+    const { changePassword } = await client.request(
+      ChangePasswordDocument,
+      variables
+    );
+    if (changePassword?.errors) {
+      setErrors(changePassword?.errors as FieldError[]);
+    } else {
+      mutate(MeDocument, { me: changePassword?.user }, false);
+      router.push("/");
+    }
+  };
+
   return {
     errors,
     login,
     register,
     logout,
+    changePassword,
+    forgotPassword,
   };
 };
