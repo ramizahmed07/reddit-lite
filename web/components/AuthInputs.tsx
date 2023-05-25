@@ -1,8 +1,10 @@
 "use client";
 
+import { useState, ChangeEvent } from "react";
+import Link from "next/link";
+
 import { useAuth } from "@/hooks/useAuthcomponents";
 import { extractErrorMessage } from "@/utils/extractErrorMessagecomponents";
-import { useState, ChangeEvent } from "react";
 import FormMessage from "./FormMessage";
 
 interface LoginUserInput {
@@ -83,7 +85,7 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
         </label>
       </div>
 
-      <div className="field w-full mb-5">
+      <div className="field w-full mb-3">
         <label>
           <p className="font-bold pb-2">Password</p>
           <input
@@ -96,6 +98,12 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
           />
         </label>
       </div>
+      {isSignIn && (
+        <div className="text-sm w-full text-right mb-3 hover:underline">
+          <Link href="/forgot-password">forgot password?</Link>
+        </div>
+      )}
+
       <button
         onClick={handleSubmit}
         className="self-start bg-primary  py-3 px-6 rounded-md font-bold mb-5"

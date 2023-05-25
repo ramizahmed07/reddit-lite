@@ -23,7 +23,7 @@ export function Form() {
           <p className="font-bold pb-2">New Password</p>
           <input
             className="w-full p-3 font-light bg-primary  rounded-md outline-none"
-            type="text"
+            type="password"
             name="newPassword"
             placeholder="New password"
             value={newPassword}
