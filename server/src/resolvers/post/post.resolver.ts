@@ -1,31 +1,46 @@
-import { MyContext } from "src/types";
-import { Arg, Ctx, Int, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+  UseMiddleware,
+} from "type-graphql";
 
-import { Post } from "./post.dto";
+import { isAuth } from "../../middlewares/isAuth";
+import { MyContext } from "src/types";
+import { Post, PostInput } from "./post.dto";
 
 @Resolver(Post)
 export class PostResolver {
+  @FieldResolver()
+  user(@Root() { userId }: Post, @Ctx() { prisma }: MyContext) {
+    return prisma.user.findUnique({ where: { id: userId } });
+  }
+
   @Query((_returns) => [Post])
-  posts(@Ctx() { prisma }: MyContext): Promise<Post[]> {
+  @UseMiddleware(isAuth)
+  posts(@Ctx() { prisma }: MyContext) {
     return prisma.post.findMany();
   }
 
   @Query((_returns) => Post, { nullable: true })
-  post(
-    @Arg("id", () => Int) id: number,
-    @Ctx() { prisma }: MyContext
-  ): Promise<Post | null> {
+  post(@Arg("id", () => Int) id: number, @Ctx() { prisma }: MyContext) {
     return prisma.post.findUnique({ where: { id } });
   }
 
   @Mutation((_returns) => Post)
-  createPost(
-    @Arg("title") title: string,
-    @Ctx() { prisma }: MyContext
-  ): Promise<Post> {
+  async createPost(
+    @Arg("input") input: PostInput,
+    @Ctx() { prisma, req }: MyContext
+  ) {
     return prisma.post.create({
       data: {
-        title,
+        ...input,
+        userId: req.session.userId,
       },
     });
   }
@@ -35,7 +50,7 @@ export class PostResolver {
     @Arg("id", () => Int) id: number,
     @Arg("title", () => String, { nullable: true }) title: string,
     @Ctx() { prisma }: MyContext
-  ): Promise<Post | null> {
+  ) {
     const post = await prisma.post.findUnique({ where: { id } });
 
     if (!post) return null;
@@ -55,7 +70,7 @@ export class PostResolver {
   async deletePost(
     @Arg("id", () => Int) id: number,
     @Ctx() { prisma }: MyContext
-  ): Promise<boolean> {
+  ) {
     try {
       const post = await prisma.post.findUnique({ where: { id } });
       if (!post) return false;
