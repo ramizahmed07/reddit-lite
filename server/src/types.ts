@@ -1,9 +1,9 @@
 import Redis from "ioredis";
-import { PostgreSqlDriver, SqlEntityManager } from "@mikro-orm/postgresql";
 import { Request, Response } from "express";
 
+import { PrismaClient } from "@prisma/client";
 export interface MyContext {
-  em: SqlEntityManager<PostgreSqlDriver>;
+  prisma: PrismaClient;
   req: Request & { session: { [key: string]: any } };
   res: Response;
   redis: Redis;

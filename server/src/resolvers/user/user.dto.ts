@@ -1,5 +1,24 @@
-import { User } from "../../entities/User";
-import { Field, InputType, ObjectType } from "type-graphql";
+import { Field, Int, InputType, ObjectType } from "type-graphql";
+
+@ObjectType()
+export class User {
+  @Field((_returns) => Int)
+  id: number;
+
+  @Field()
+  username: string;
+
+  @Field()
+  email: string;
+
+  password: string;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+}
 
 @InputType()
 export class RegisterUserInput {
