@@ -7,6 +7,7 @@ import { Post } from "../entities/Post";
 export class PostResolver {
   @Query((_returns) => [Post])
   posts(@Ctx() { em }: MyContext): Promise<Post[]> {
+    console.log("checking if it works");
     return em.find(Post, {});
   }
 
