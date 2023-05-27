@@ -7,21 +7,19 @@ import session from "express-session";
 import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { expressMiddleware } from "@apollo/server/express4";
-import type { PostgreSqlDriver } from "@mikro-orm/postgresql";
-import { MikroORM } from "@mikro-orm/core";
 import { buildSchema } from "type-graphql";
 import { json } from "body-parser";
 import Redis from "ioredis";
 
-import { PostResolver } from "./resolvers/post";
-import { UserResolver } from "./resolvers/user";
 import { COOKIE_NAME, __prod__ } from "./constants";
-import config from "./mikro-orm.config";
+import { PostResolver } from "./resolvers/post/post.resolver";
+import { UserResolver } from "./resolvers/user/user.resolver";
+
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 const main = async () => {
-  const orm = await MikroORM.init<PostgreSqlDriver>(config);
-  const em = orm.em.fork();
-
   const schema = await buildSchema({
     resolvers: [PostResolver, UserResolver],
   });
@@ -70,7 +68,7 @@ const main = async () => {
     "/graphql",
     json(),
     expressMiddleware(server, {
-      context: ({ req, res }): any => ({ em, req, res, redis }),
+      context: ({ req, res }): any => ({ prisma, req, res, redis }),
     })
   );
 

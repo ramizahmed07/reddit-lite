@@ -1,4 +1,4 @@
-import { FieldError, RegisterUserInput } from "src/resolvers/types/user";
+import { FieldError, RegisterUserInput } from "src/resolvers/user/user.dto";
 import { validateEmail } from "./validateEmail";
 
 export function validateRegisterInput({

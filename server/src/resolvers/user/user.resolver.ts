@@ -2,63 +2,75 @@ import argon2 from "argon2";
 import { Resolver, Ctx, Mutation, Query, Arg } from "type-graphql";
 import { v4 } from "uuid";
 
-import { User } from "../entities/User";
 import { MyContext } from "src/types";
-import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../constants";
-import { validateEmail } from "../utils/validateEmail";
-import { UserResponse, RegisterUserInput, FieldError } from "./types/user";
-import { validateRegisterInput } from "../utils/validateRegisterInput";
-import { sendEmail } from "../nodemailer";
+import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from "../../constants";
+import { validateEmail } from "../../utils/validateEmail";
+import { UserResponse, RegisterUserInput, User } from "./user.dto";
+import { validateRegisterInput } from "../../utils/validateRegisterInput";
+import { sendEmail } from "../../nodemailer";
 
 @Resolver(User)
 export class UserResolver {
   @Query((_returns) => [User])
-  users(@Ctx() { em }: MyContext): Promise<User[]> {
-    return em.find(User, {});
+  users(@Ctx() { prisma }: MyContext): Promise<User[]> {
+    return prisma.user.findMany();
   }
 
   @Query((_returns) => User, { nullable: true })
-  async me(@Ctx() { em, req }: MyContext) {
+  async me(@Ctx() { prisma, req }: MyContext): Promise<User | null> {
     if (!req.session.userId) return null;
-    const user = await em.findOne(User, { id: req.session.userId });
+    const user = await prisma.user.findUnique({
+      where: {
+        id: +req.session.userId,
+      },
+    });
+
     return user;
   }
 
   @Mutation((_returns) => UserResponse)
   async register(
     @Arg("options") options: RegisterUserInput,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { prisma, req }: MyContext
   ): Promise<UserResponse> {
     const errors = validateRegisterInput(options);
     if (errors) return { errors };
     const hashedPassword = await argon2.hash(options.password);
-    const user = em.create(User, { ...options, password: hashedPassword });
-    try {
-      await em.persistAndFlush(user);
-    } catch (error) {
-      console.error(error);
-      if ((error.code = "23505")) {
-        return {
-          errors: [{ field: "", message: "user already exists" }],
-        };
-      }
-    }
-    req.session.userId = user.id;
-    return { user };
+
+    const user = await prisma.user.findUnique({
+      where: {
+        username: options?.username,
+      },
+    });
+    if (user)
+      return {
+        errors: [{ field: "", message: "user already exists" }],
+      };
+    const newUser = await prisma.user.create({
+      data: {
+        ...options,
+        password: hashedPassword,
+      },
+    });
+
+    req.session.userId = newUser.id;
+    return { user: newUser };
   }
 
   @Mutation((_returns) => UserResponse)
   async login(
     @Arg("usernameOrEmail") usernameOrEmail: string,
     @Arg("password") password: string,
-    @Ctx() { em, req }: MyContext
+    @Ctx() { prisma, req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(
-      User,
-      validateEmail(usernameOrEmail)
-        ? { email: usernameOrEmail }
-        : { username: usernameOrEmail }
-    );
+    const user = await prisma.user.findUnique({
+      where: validateEmail(usernameOrEmail)
+        ? {
+            email: usernameOrEmail,
+          }
+        : { username: usernameOrEmail },
+    });
+
     if (!user) {
       return {
         errors: [{ field: "username", message: "that username doesn't exist" }],
@@ -90,14 +102,13 @@ export class UserResolver {
   @Mutation(() => Boolean)
   async forgotPassword(
     @Arg("email") email: string,
-    @Ctx() { em, redis }: MyContext
+    @Ctx() { prisma, redis }: MyContext
   ) {
-    const user = await em.findOne(User, { email });
-    if (!user) {
-      return false;
-    }
-
     try {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        return false;
+      }
       const token = v4();
       await redis.set(
         FORGET_PASSWORD_PREFIX + token,
@@ -119,7 +130,7 @@ export class UserResolver {
   async changePassword(
     @Arg("token") token: string,
     @Arg("newPassword") newPassword: string,
-    @Ctx() { em, redis, req }: MyContext
+    @Ctx() { prisma, redis, req }: MyContext
   ) {
     if (newPassword.length <= 5)
       return {
@@ -138,15 +149,18 @@ export class UserResolver {
           },
         ],
       };
-
-    const user = await em.findOne(User, { id: +userId });
+    const user = await prisma.user.findUnique({ where: { id: +userId } });
     if (!user)
       return {
         errors: [{ field: "token", message: "user no longer exists" }],
       };
 
-    user.password = await argon2.hash(newPassword);
-    await em.persistAndFlush(user);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: await argon2.hash(newPassword),
+      },
+    });
 
     await redis.del(key);
 
