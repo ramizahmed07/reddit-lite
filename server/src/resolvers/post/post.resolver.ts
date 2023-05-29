@@ -22,8 +22,20 @@ export class PostResolver {
   }
 
   @Query((_returns) => [Post])
-  posts(@Ctx() { prisma }: MyContext) {
-    return prisma.post.findMany();
+  posts(
+    @Arg("limit", () => Int) limit: number,
+    @Arg("cursor", () => Int, {nullable: true}) cursor: number | null,
+    @Ctx() { prisma }: MyContext
+  ) {
+    const take = Math.min(50, limit);
+    return prisma.post.findMany({
+      take,
+      skip: cursor ? 1 : 0,
+      ...(cursor && ({ cursor: { id: cursor } })),
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
   }
 
   @Query((_returns) => Post, { nullable: true })
