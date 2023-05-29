@@ -60,6 +60,7 @@ export const useAuth = () => {
     const data = await client.request(LogoutDocument);
     if (data.logout === true) {
       mutate(MeDocument, { me: null }, false);
+      router.push("/login");
     }
   };
 

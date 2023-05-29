@@ -19,7 +19,7 @@ interface RegisterUserInput {
 }
 
 const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
-  const { errors, login, register } = useAuth();
+  const { errors, register, login } = useAuth();
   const [inputs, setInputs] = useState<LoginUserInput | RegisterUserInput>(
     isSignIn
       ? {

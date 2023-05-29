@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-import { useMe } from "@/hooks/useMecomponents";
 import { useAuth } from "@/hooks/useAuthcomponents";
+import { useMe } from "@/hooks/useMecomponents";
 
 const NavLinks = () => {
   const params = useParams();
