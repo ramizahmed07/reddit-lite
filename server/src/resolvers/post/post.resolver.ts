@@ -22,7 +22,6 @@ export class PostResolver {
   }
 
   @Query((_returns) => [Post])
-  @UseMiddleware(isAuth)
   posts(@Ctx() { prisma }: MyContext) {
     return prisma.post.findMany();
   }
@@ -33,10 +32,12 @@ export class PostResolver {
   }
 
   @Mutation((_returns) => Post)
-  async createPost(
+  @UseMiddleware(isAuth)
+  createPost(
     @Arg("input") input: PostInput,
     @Ctx() { prisma, req }: MyContext
   ) {
+    console.log("CreatePost >", req.session.userId);
     return prisma.post.create({
       data: {
         ...input,
