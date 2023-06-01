@@ -16,22 +16,28 @@ import { Post, PostInput } from "./post.dto";
 
 @Resolver(Post)
 export class PostResolver {
+  @FieldResolver(() => String)
+  textSnippet(@Root() { text }: Post) {
+    return text.slice(0, 50);
+  }
+
   @FieldResolver()
   user(@Root() { userId }: Post, @Ctx() { prisma }: MyContext) {
     return prisma.user.findUnique({ where: { id: userId } });
   }
 
   @Query((_returns) => [Post])
+  @UseMiddleware(isAuth)
   posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => Int, {nullable: true}) cursor: number | null,
+    @Arg("cursor", () => Int, { nullable: true }) cursor: number | null,
     @Ctx() { prisma }: MyContext
   ) {
     const take = Math.min(50, limit);
     return prisma.post.findMany({
       take,
       skip: cursor ? 1 : 0,
-      ...(cursor && ({ cursor: { id: cursor } })),
+      ...(cursor && { cursor: { id: cursor } }),
       orderBy: {
         createdAt: "desc",
       },
@@ -49,7 +55,6 @@ export class PostResolver {
     @Arg("input") input: PostInput,
     @Ctx() { prisma, req }: MyContext
   ) {
-    console.log("CreatePost >", req.session.userId);
     return prisma.post.create({
       data: {
         ...input,

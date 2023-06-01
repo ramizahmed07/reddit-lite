@@ -1,5 +1,13 @@
 import argon2 from "argon2";
-import { Resolver, Ctx, Mutation, Query, Arg } from "type-graphql";
+import {
+  Resolver,
+  Ctx,
+  Mutation,
+  Query,
+  Arg,
+  FieldResolver,
+  Root,
+} from "type-graphql";
 import { v4 } from "uuid";
 
 import { MyContext } from "src/types";
@@ -11,9 +19,10 @@ import { sendEmail } from "../../nodemailer";
 
 @Resolver(User)
 export class UserResolver {
-  @Query((_returns) => [User])
-  users(@Ctx() { prisma }: MyContext): Promise<User[]> {
-    return prisma.user.findMany();
+  @FieldResolver(() => String)
+  email(@Root() { id, email }: User, @Ctx() { req }: MyContext) {
+    if (req.session.userId === id) return email;
+    return "";
   }
 
   @Query((_returns) => User, { nullable: true })
@@ -93,7 +102,6 @@ export class UserResolver {
     return new Promise((resolve) =>
       req.session.destroy((err) => {
         if (err) return resolve(false);
-
         res.clearCookie(COOKIE_NAME);
         resolve(true);
       })
