@@ -22,7 +22,7 @@ const documents = {
     "mutation Logout {\n  logout\n}": types.LogoutDocument,
     "mutation Register($options: RegisterUserInput!) {\n  register(options: $options) {\n    errors {\n      field\n      message\n    }\n    user {\n      ...RegularUser\n    }\n  }\n}": types.RegisterDocument,
     "query Me {\n  me {\n    id\n    username\n    email\n  }\n}": types.MeDocument,
-    "query GetPosts {\n  posts {\n    id\n    title\n  }\n}": types.GetPostsDocument,
+    "query GetPosts($limit: Int!, $cursor: Int) {\n  posts(limit: $limit, cursor: $cursor) {\n    id\n    title\n    textSnippet\n    downvotes\n    upvotes\n    user {\n      id\n      username\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}": types.GetPostsDocument,
     "query GetUsers {\n  users {\n    id\n    username\n  }\n}": types.GetUsersDocument,
 };
 
@@ -79,7 +79,7 @@ export function graphql(source: "query Me {\n  me {\n    id\n    username\n    e
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "query GetPosts {\n  posts {\n    id\n    title\n  }\n}"): (typeof documents)["query GetPosts {\n  posts {\n    id\n    title\n  }\n}"];
+export function graphql(source: "query GetPosts($limit: Int!, $cursor: Int) {\n  posts(limit: $limit, cursor: $cursor) {\n    id\n    title\n    textSnippet\n    downvotes\n    upvotes\n    user {\n      id\n      username\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}"): (typeof documents)["query GetPosts($limit: Int!, $cursor: Int) {\n  posts(limit: $limit, cursor: $cursor) {\n    id\n    title\n    textSnippet\n    downvotes\n    upvotes\n    user {\n      id\n      username\n      email\n    }\n    createdAt\n    updatedAt\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -1,6 +1,16 @@
-query GetPosts {
-  posts {
+query GetPosts($limit: Int!, $cursor: Int) {
+  posts(limit: $limit, cursor: $cursor) {
     id
     title
+    textSnippet
+    downvotes
+    upvotes
+    user {
+      id
+      username
+      email
+    }
+    createdAt
+    updatedAt
   }
 }

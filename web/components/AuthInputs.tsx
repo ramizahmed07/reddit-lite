@@ -74,7 +74,7 @@ const AuthInputs = ({ isSignIn }: { isSignIn: boolean }) => {
             className="w-full p-3 font-light bg-primary  rounded-md outline-none"
             type="text"
             name={renderContent("usernameOrEmail", "username")}
-            placeholder={renderContent("username or email", "ssername")}
+            placeholder={renderContent("username or email", "username")}
             onChange={handleChange}
             value={
               isSignIn

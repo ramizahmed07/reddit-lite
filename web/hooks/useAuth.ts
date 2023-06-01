@@ -57,11 +57,16 @@ export const useAuth = () => {
   };
 
   const logout = async () => {
-    const data = await client.request(LogoutDocument);
-    if (data.logout === true) {
-      mutate(MeDocument, { me: null }, false);
-      router.push("/login");
-    }
+    mutate(
+      MeDocument,
+      () => {
+        router.push("/login");
+        client.request(LogoutDocument);
+      },
+      {
+        optimisticData: { me: null },
+      }
+    );
   };
 
   const forgotPassword = async (variables: { email: string }) => {

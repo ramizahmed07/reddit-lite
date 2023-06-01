@@ -8,10 +8,14 @@ import { useMe } from "@/hooks/useMecomponents";
 
 const NavLinks = () => {
   const params = useParams();
-  const { data, isLoading } = useMe();
+  const { data, isLoading, error } = useMe();
   const { logout } = useAuth();
 
   if (params?.token) return null;
+  if (error) {
+    logout();
+    return null;
+  }
   if (isLoading) {
     return null;
   } else if (!data?.me) {

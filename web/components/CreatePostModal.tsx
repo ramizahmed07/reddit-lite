@@ -1,26 +1,27 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 
-import { Post } from "@/gql/graphqlcomponents";
+import { CreatePostDocument, Post, PostInput } from "@/gql/graphqlcomponents";
 import { useMe } from "@/hooks/useMecomponents";
+import { client } from "@/lib/clientcomponents";
+import useFetchPosts from "@/hooks/useFetchPostscomponents";
 
-interface Props {
-  createPost: (post: Post) => Promise<void>;
+interface Posts {
+  posts: Post[];
 }
 
-const initialState: Partial<Post> = {
+const initialState = {
   title: "",
   text: "",
 };
 
-export default function CreatePostModal({ createPost }: Props) {
+export default function CreatePostModal() {
   const { data } = useMe();
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: posts, mutate } = useFetchPosts();
+  const [post, setPost] = useState<Partial<Post>>(initialState);
+
   const [isVisible, setIsVisible] = useState(false);
-  const [post, setPost] = useState(initialState);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -34,32 +35,48 @@ export default function CreatePostModal({ createPost }: Props) {
   const closeModal = () => {
     setIsVisible(false);
     setPost(initialState);
-    setIsLoading(false);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      setIsLoading(true);
-      await createPost(post as Post);
-      closeModal();
-    } catch (error: any) {
-      closeModal();
-      router.push("/login");
-    }
+    mutate(createPost(), {
+      optimisticData: (currentData: Posts[] | undefined) => {
+        let newPost = {
+          ...post,
+          textSnippet: post?.text!,
+          id: Date.now(),
+        } as Post;
 
-    setIsVisible(false);
+        if (currentData) {
+          let last = currentData.length - 1;
+          currentData[last].posts = currentData[last].posts.slice(0, -1);
+          return [{ posts: [newPost] }, ...currentData];
+        } else {
+          return [{ posts: [newPost] }];
+        }
+      },
+      rollbackOnError: true,
+    });
+    closeModal();
+  };
+
+  const createPost = async () => {
+    const { createPost } = await client.request(CreatePostDocument, {
+      input: post as PostInput,
+    });
+    if (!createPost.id) throw new Error("not created");
+    return [{ posts: [...posts, createPost] }] as Posts[];
   };
 
   if (!data?.me) return null;
 
   return (
-    <>
+    <div className="w-full flex justify-end">
       <button
         onClick={() => setIsVisible(!isVisible)}
-        className="mr-4 border w-7 h-7 flex justify-center items-center rounded-full"
+        className="bg-primary rounded-md p-3 mb-3"
       >
-        +
+        Create Post
       </button>
       {isVisible && (
         <div className="backdrop-blur-sm absolute left-0 top-0 w-full h-full z-10">
@@ -101,12 +118,12 @@ export default function CreatePostModal({ createPost }: Props) {
               </div>
 
               <button className="self-start bg-primary  py-3 px-6 rounded-md font-bold mb-5">
-                {isLoading ? "Posting" : "Post"}
+                Post
               </button>
             </form>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
