@@ -26,6 +26,11 @@ export class PostResolver {
     return prisma.user.findUnique({ where: { id: userId } });
   }
 
+  @FieldResolver(() => Int)
+  upvotes(@Root() { id }: Post, @Ctx() { prisma }: MyContext) {
+    return prisma.upvote.count({ where: { postId: id } });
+  }
+
   @Query((_returns) => [Post])
   @UseMiddleware(isAuth)
   posts(
