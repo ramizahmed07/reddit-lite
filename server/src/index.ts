@@ -14,7 +14,6 @@ import Redis from "ioredis";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { PostResolver } from "./resolvers/post/post.resolver";
 import { UserResolver } from "./resolvers/user/user.resolver";
-import { UpvoteResolver } from "./resolvers/upvote/upvote.resolver";
 
 import { PrismaClient } from "@prisma/client";
 
@@ -22,7 +21,7 @@ const prisma = new PrismaClient();
 
 const main = async () => {
   const schema = await buildSchema({
-    resolvers: [PostResolver, UserResolver, UpvoteResolver],
+    resolvers: [PostResolver, UserResolver],
   });
 
   const app = express();
