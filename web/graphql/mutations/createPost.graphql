@@ -3,8 +3,7 @@ mutation CreatePost($input: PostInput!) {
     id
     title
     text
-    downvotes
-    upvotes
+    votes
     userId
     user {
       username

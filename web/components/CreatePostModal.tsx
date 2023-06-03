@@ -44,6 +44,10 @@ export default function CreatePostModal() {
         let newPost = {
           ...post,
           textSnippet: post?.text!,
+          user: {
+            username: data?.me?.username,
+          },
+          createdAt: new Date().toISOString(),
           id: Date.now(),
         } as Post;
 
@@ -64,8 +68,8 @@ export default function CreatePostModal() {
     const { createPost } = await client.request(CreatePostDocument, {
       input: post as PostInput,
     });
-    if (!createPost.id) throw new Error("not created");
-    return [{ posts: [...posts, createPost] }] as Posts[];
+    if (!createPost.id) throw new Error();
+    return posts;
   };
 
   if (!data?.me) return null;

@@ -3,8 +3,9 @@ query GetPosts($limit: Int!, $cursor: Int) {
     id
     title
     textSnippet
-    downvotes
-    upvotes
+    text
+    votes
+    voteStatus
     user {
       id
       username

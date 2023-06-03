@@ -1,4 +1,4 @@
-export function timeSince(time: any): string {
+export function timeSince(time: any) {
   switch (typeof time) {
     case "number":
       break;

@@ -24,9 +24,11 @@ module.exports = {
     colors: {
       ...colors,
       primary: "#1A1A1B",
-      secondary: "#030303",
+      secondary: "#cc3700",
+      blue: "#5a75cc",
       border: "#343536",
       white: "#D7DADC",
+      black: "#030303",
     },
     extend: {
       fontFamily: {

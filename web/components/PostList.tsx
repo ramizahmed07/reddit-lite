@@ -13,11 +13,12 @@ export default function PostList() {
     <div className="w-full">
       <CreatePostModal />
 
-      {data?.length > 0 ? (
+      {data && data.length > 0 ? (
         <>
-          {data?.map((post) => (
-            <Post key={post?.id} post={post} />
-          ))}
+          {data?.map((item) =>
+            item?.posts.map((post) => <Post key={post?.id} post={post} />)
+          )}
+
           <div
             onClick={() => {
               setSize(size + 1);

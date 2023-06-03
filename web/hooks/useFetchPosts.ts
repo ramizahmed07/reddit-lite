@@ -9,21 +9,10 @@ const fetcher: Fetcher<{ posts: Post[] }, string> = ([query, variables]: any) =>
 
 export default function useFetchPosts() {
   const { data, error, isLoading, mutate, size, setSize } = useSWRInfinite(
-    (
-      pageIndex: number,
-      previousPageData: { posts: Post[] } | null // use a type here that has nextToken and list of items returned by your graphql
-    ) => {
+    (pageIndex: number, previousPageData: { posts: Post[] } | null) => {
       console.log({ pageIndex, previousPageData });
       const posts = previousPageData?.posts;
 
-      // reached the end
-      // if (previousPageData && !previousPageData.nextToken) return null;
-
-      // const query = GetPostsDocument;
-      // first page, we don't have `previousPageData`
-      // if (pageIndex === 0) return [query];
-
-      // add the cursor to the API endpoint
       return [
         GetPostsDocument,
         { limit: 10, ...(posts && { cursor: posts[posts.length - 1].id }) },
@@ -32,10 +21,8 @@ export default function useFetchPosts() {
     fetcher
   );
 
-  console.log("DATA", data);
-
   return {
-    data: data?.map((item) => item?.posts.map((post) => post)).flat() || [],
+    data,
     error,
     isLoading,
     mutate,

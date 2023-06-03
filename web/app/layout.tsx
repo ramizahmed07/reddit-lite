@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${ibm.variable} ${noto.variable} text-reg font-sans bg-secondary text-white`}
+        className={`${ibm.variable} ${noto.variable} text-reg font-sans bg-black text-white`}
       >
         <NavMenu />
         {children}
