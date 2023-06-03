@@ -13,10 +13,8 @@ export class Post {
   @Field()
   text: string;
 
-  @Field((_returns) => Int)
   upvotes: number;
 
-  @Field((_returns) => Int)
   downvotes: number;
 
   @Field((_returns) => Int, { nullable: false })
@@ -57,4 +55,27 @@ export class Upvote {
 
   @Field()
   updatedAt: Date;
+}
+
+ObjectType();
+export class Downvote {
+  @Field(() => Int)
+  id: number;
+
+  @Field(() => User, { nullable: false })
+  user: User;
+
+  @Field(() => Post, { nullable: false })
+  post: Post;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+}
+
+export enum Vote {
+  Downvote,
+  Upvote,
 }

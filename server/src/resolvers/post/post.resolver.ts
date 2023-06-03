@@ -12,7 +12,7 @@ import {
 
 import { isAuth } from "../../middlewares/isAuth";
 import { MyContext } from "src/types";
-import { Post, PostInput } from "./post.dto";
+import { Post, PostInput, Vote } from "./post.dto";
 
 @Resolver(Post)
 export class PostResolver {
@@ -27,8 +27,14 @@ export class PostResolver {
   }
 
   @FieldResolver(() => Int)
-  upvotes(@Root() { id }: Post, @Ctx() { prisma }: MyContext) {
-    return prisma.upvote.count({ where: { postId: id } });
+  async votes(@Root() { id }: Post, @Ctx() { prisma }: MyContext) {
+    const upvotes = await prisma.upvote.count({
+      where: { postId: id },
+    });
+    const downvotes = await prisma.downvote.count({
+      where: { postId: id },
+    });
+    return upvotes - downvotes;
   }
 
   @Query((_returns) => [Post])
@@ -105,39 +111,88 @@ export class PostResolver {
   }
 
   @Mutation(() => Boolean)
-  async upvote(@Arg("id") id: number, @Ctx() { prisma, req }: MyContext) {
+  upvote(@Arg("id", () => Int) id: number, @Ctx() ctx: MyContext) {
+    return this.vote({ ctx, type: Vote.Upvote, postId: id });
+  }
+
+  @Mutation(() => Boolean)
+  downvote(@Arg("id", () => Int) id: number, @Ctx() ctx: MyContext) {
+    return this.vote({ ctx, type: Vote.Downvote, postId: id });
+  }
+
+  async vote({
+    type,
+    postId,
+    ctx,
+  }: {
+    type: Vote;
+    postId: number;
+    ctx: MyContext;
+  }) {
+    const { prisma, req } = ctx;
     const userId = req?.session?.userId;
     const post = await prisma.post.findUnique({
       where: {
-        id,
+        id: postId,
       },
     });
     if (!post) return false;
+
     const where = {
       userId_postId: {
-        postId: id,
+        postId,
         userId,
       },
     };
+    const data = {
+      user: {
+        connect: { id: userId },
+      },
+      post: {
+        connect: {
+          id: postId,
+        },
+      },
+    };
+    let status: Vote | null = null;
     const upvote = await prisma.upvote.findUnique({
       where,
     });
+
+    const downvote = await prisma.downvote.findUnique({
+      where,
+    });
+
+    if (upvote) status = Vote.Upvote;
+    else if (downvote) status = Vote.Downvote;
+    // status = upvote
     try {
-      if (upvote) {
-        await prisma.upvote.delete({ where });
+      if (status !== null) {
+        if (status === Vote.Downvote) {
+          await prisma.downvote.delete({ where });
+          if (type === Vote.Upvote) {
+            await prisma.upvote.create({
+              data,
+            });
+          }
+        } else {
+          await prisma.upvote.delete({ where });
+          if (type === Vote.Downvote) {
+            await prisma.downvote.create({
+              data,
+            });
+          }
+        }
       } else {
-        await prisma.upvote.create({
-          data: {
-            user: {
-              connect: { id: userId },
-            },
-            post: {
-              connect: {
-                id,
-              },
-            },
-          },
-        });
+        if (type === Vote.Downvote) {
+          await prisma.downvote.create({
+            data,
+          });
+        } else {
+          await prisma.upvote.create({
+            data,
+          });
+        }
       }
       return true;
     } catch (error) {
