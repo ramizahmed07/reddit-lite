@@ -18,6 +18,12 @@ export class Post {
   downvotes: number;
 
   @Field((_returns) => Int, { nullable: false })
+  votes: number;
+
+  @Field()
+  voteStatus: string;
+
+  @Field((_returns) => Int, { nullable: false })
   userId: number;
 
   @Field((_returns) => User, { nullable: false })

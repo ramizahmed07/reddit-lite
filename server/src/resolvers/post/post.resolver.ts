@@ -26,6 +26,31 @@ export class PostResolver {
     return prisma.user.findUnique({ where: { id: userId } });
   }
 
+  @FieldResolver()
+  async voteStatus(@Root() { id }: Post, @Ctx() { prisma, req }: MyContext) {
+    let status: string = "";
+    const userId = req?.session?.userId;
+    const upvote = await prisma.upvote.findUnique({
+      where: {
+        userId_postId: {
+          postId: id,
+          userId,
+        },
+      },
+    });
+    const downvote = await prisma.downvote.findUnique({
+      where: {
+        userId_postId: {
+          postId: id,
+          userId,
+        },
+      },
+    });
+    if (upvote) status = "upvoted";
+    else if (downvote) status = "downvoted";
+    return status;
+  }
+
   @FieldResolver(() => Int)
   async votes(@Root() { id }: Post, @Ctx() { prisma }: MyContext) {
     const upvotes = await prisma.upvote.count({
