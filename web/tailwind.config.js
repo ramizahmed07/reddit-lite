@@ -28,6 +28,8 @@ module.exports = {
       blue: "#5a75cc",
       border: "#343536",
       white: "#D7DADC",
+      "light-white": "#818384",
+      "light-blue": "#17232D",
       black: "#030303",
     },
     extend: {

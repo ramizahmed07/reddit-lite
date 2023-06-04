@@ -7,4 +7,9 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
- }
+}
+
+button {
+  outline: none;
+  border: none;
+}

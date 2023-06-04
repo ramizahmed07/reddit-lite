@@ -2,18 +2,30 @@
 
 import { ChangeEvent, FormEvent, useState } from "react";
 
-import { CreatePostDocument, Post, PostInput } from "@/gql/graphqlcomponents";
+import {
+  CreatePostDocument,
+  Post,
+  PostInput,
+  User,
+} from "@/gql/graphqlcomponents";
 import { useMe } from "@/hooks/useMecomponents";
 import { client } from "@/lib/clientcomponents";
 import useFetchPosts from "@/hooks/useFetchPostscomponents";
-
-interface Posts {
-  posts: Post[];
-}
+import { Posts } from "@/typescomponents";
 
 const initialState = {
   title: "",
   text: "",
+};
+
+const getOptimisticData = (currentData: Posts[] | undefined, post: Post) => {
+  if (currentData) {
+    let last = currentData.length - 1;
+    currentData[last].posts = currentData[last].posts.slice(0, -1);
+    return [{ posts: [post] }, ...currentData];
+  } else {
+    return [{ posts: [post] }];
+  }
 };
 
 export default function CreatePostModal() {
@@ -44,20 +56,14 @@ export default function CreatePostModal() {
         let newPost = {
           ...post,
           textSnippet: post?.text!,
+          votes: 0,
           user: {
             username: data?.me?.username,
           },
           createdAt: new Date().toISOString(),
           id: Date.now(),
         } as Post;
-
-        if (currentData) {
-          let last = currentData.length - 1;
-          currentData[last].posts = currentData[last].posts.slice(0, -1);
-          return [{ posts: [newPost] }, ...currentData];
-        } else {
-          return [{ posts: [newPost] }];
-        }
+        return getOptimisticData(currentData, newPost);
       },
       rollbackOnError: true,
     });
@@ -69,7 +75,7 @@ export default function CreatePostModal() {
       input: post as PostInput,
     });
     if (!createPost.id) throw new Error();
-    return posts;
+    return getOptimisticData(posts, createPost as Post);
   };
 
   if (!data?.me) return null;
