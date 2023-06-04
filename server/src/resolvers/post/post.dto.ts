@@ -17,6 +17,9 @@ export class Post {
 
   downvotes: number;
 
+  @Field((_returns) => Boolean, { nullable: false })
+  isMine: boolean;
+
   @Field((_returns) => Int, { nullable: false })
   votes: number;
 

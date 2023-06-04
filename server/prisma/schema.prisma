@@ -39,7 +39,7 @@ model Upvote {
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -51,7 +51,7 @@ model Downvote {
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
   postId    Int
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

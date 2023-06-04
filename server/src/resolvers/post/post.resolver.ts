@@ -27,6 +27,11 @@ export class PostResolver {
   }
 
   @FieldResolver()
+  isMine(@Root() { userId }: Post, @Ctx() { req }: MyContext) {
+    return userId === req?.session?.userId;
+  }
+
+  @FieldResolver()
   async voteStatus(@Root() { id }: Post, @Ctx() { prisma, req }: MyContext) {
     let status: string = "";
     const userId = req?.session?.userId;
@@ -121,13 +126,21 @@ export class PostResolver {
   }
 
   @Mutation((_returns) => Boolean)
+  @UseMiddleware(isAuth)
   async deletePost(
     @Arg("id", () => Int) id: number,
-    @Ctx() { prisma }: MyContext
+    @Ctx() { prisma, req }: MyContext
   ) {
+    const userId = req?.session?.userId;
+    // await new Promise((res) =>
+    //   setTimeout(() => {
+    //     res(true);
+    //   }, 4000)
+    // );
     try {
       const post = await prisma.post.findUnique({ where: { id } });
       if (!post) return false;
+      if (post?.userId !== userId) return false;
       await prisma.post.delete({ where: { id } });
       return true;
     } catch (error) {
