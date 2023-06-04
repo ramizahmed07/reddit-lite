@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useState } from "react";
+import { AiOutlineClose } from "react-icons/ai";
 
 import {
   CreatePostDocument,
@@ -95,7 +96,7 @@ export default function CreatePostModal() {
               onClick={closeModal}
               className="mb-5 ml-auto outline-none border-none bg-primary w-7 h-7 flex justify-center items-center rounded-full"
             >
-              x
+              <AiOutlineClose />
             </button>
             <form className="w-full mb-5" onSubmit={handleSubmit}>
               <div className="field w-full mb-5">
