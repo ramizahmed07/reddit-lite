@@ -13,7 +13,7 @@ import {
 } from "@/gql/graphqlcomponents";
 import { client } from "@/lib/clientcomponents";
 
-export const useAuth = () => {
+export function useAuth() {
   const [errors, setErrors] = useState<FieldError[] | null>(null);
   const router = useRouter();
 
@@ -103,4 +103,4 @@ export const useAuth = () => {
     changePassword,
     forgotPassword,
   };
-};
+}

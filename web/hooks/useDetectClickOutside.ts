@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 
-export default function useDetectClickOutside(handler: () => void) {
+export function useDetectClickOutside(handler: (() => void) | null) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onMouseDown = (e: MouseEvent) => {
-      if (!ref?.current?.contains(e.target as any)) {
+      if (!ref?.current?.contains(e.target as any) && handler) {
         handler();
       }
     };
@@ -13,7 +13,7 @@ export default function useDetectClickOutside(handler: () => void) {
     return () => {
       document.removeEventListener("mousedown", onMouseDown);
     };
-  }, []);
+  }, [handler]);
 
   return {
     ref,

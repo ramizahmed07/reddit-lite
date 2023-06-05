@@ -1,17 +1,17 @@
 "use client";
 
+import { useFetchPosts } from "@/hooks/useFetchPostscomponents";
 import Post from "./Post";
-import useFetchPosts from "@/hooks/useFetchPostscomponents";
-import CreatePostModal from "./CreatePostModal";
+import CreatePost from "./CreatePost";
 
 export default function PostList() {
   const { data, error, isLoading, setSize, size } = useFetchPosts();
-
   if (isLoading) return <div className="w-full">Loading...</div>;
   if (error) return <div className="w-full">Something went wrong</div>;
+
   return (
     <div className="w-full">
-      <CreatePostModal />
+      <CreatePost />
 
       {data && data.length > 0 ? (
         <>

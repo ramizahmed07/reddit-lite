@@ -6,7 +6,7 @@ import { client } from "@/lib/clientcomponents";
 const fetcher: Fetcher<{ me: User | null }, string> = (query: string) =>
   client.request(query);
 
-export const useMe = () => {
+export function useMe() {
   const { data, error, isLoading } = useSWR(MeDocument, fetcher);
   return { error, isLoading, data };
-};
+}

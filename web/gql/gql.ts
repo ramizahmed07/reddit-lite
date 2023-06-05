@@ -16,13 +16,14 @@ const documents = {
     "fragment RegularError on FieldError {\n  field\n  message\n}": types.RegularErrorFragmentDoc,
     "fragment RegularUser on User {\n  id\n  username\n  email\n}": types.RegularUserFragmentDoc,
     "mutation ChangePassword($newPassword: String!, $token: String!) {\n  changePassword(newPassword: $newPassword, token: $token) {\n    errors {\n      field\n      message\n    }\n    user {\n      ...RegularUser\n    }\n  }\n}": types.ChangePasswordDocument,
-    "mutation CreatePost($input: PostInput!) {\n  createPost(input: $input) {\n    id\n    title\n    text\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}": types.CreatePostDocument,
+    "mutation CreatePost($input: PostInput!) {\n  createPost(input: $input) {\n    id\n    title\n    text\n    textSnippet\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}": types.CreatePostDocument,
     "mutation DeletePost($id: Int!) {\n  deletePost(id: $id)\n}": types.DeletePostDocument,
     "mutation DownvotePost($downvoteId: Int!) {\n  downvote(id: $downvoteId)\n}": types.DownvotePostDocument,
     "mutation ForgotPassword($email: String!) {\n  forgotPassword(email: $email)\n}": types.ForgotPasswordDocument,
     "mutation Login($usernameOrEmail: String!, $password: String!) {\n  login(usernameOrEmail: $usernameOrEmail, password: $password) {\n    errors {\n      field\n      message\n    }\n    user {\n      ...RegularUser\n    }\n  }\n}": types.LoginDocument,
     "mutation Logout {\n  logout\n}": types.LogoutDocument,
     "mutation Register($options: RegisterUserInput!) {\n  register(options: $options) {\n    errors {\n      field\n      message\n    }\n    user {\n      ...RegularUser\n    }\n  }\n}": types.RegisterDocument,
+    "mutation UpdatePost($input: UpdatePostInput!, $updatePostId: Int!) {\n  updatePost(input: $input, id: $updatePostId) {\n    id\n    title\n    text\n    textSnippet\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}": types.UpdatePostDocument,
     "mutation UpvotePost($upvoteId: Int!) {\n  upvote(id: $upvoteId)\n}": types.UpvotePostDocument,
     "query Me {\n  me {\n    id\n    username\n    email\n  }\n}": types.MeDocument,
     "query GetPosts($limit: Int!, $cursor: Int) {\n  posts(limit: $limit, cursor: $cursor) {\n    id\n    title\n    textSnippet\n    text\n    votes\n    voteStatus\n    isMine\n    user {\n      id\n      username\n    }\n    createdAt\n    updatedAt\n  }\n}": types.GetPostsDocument,
@@ -57,7 +58,7 @@ export function graphql(source: "mutation ChangePassword($newPassword: String!, 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "mutation CreatePost($input: PostInput!) {\n  createPost(input: $input) {\n    id\n    title\n    text\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}"): (typeof documents)["mutation CreatePost($input: PostInput!) {\n  createPost(input: $input) {\n    id\n    title\n    text\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}"];
+export function graphql(source: "mutation CreatePost($input: PostInput!) {\n  createPost(input: $input) {\n    id\n    title\n    text\n    textSnippet\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}"): (typeof documents)["mutation CreatePost($input: PostInput!) {\n  createPost(input: $input) {\n    id\n    title\n    text\n    textSnippet\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -82,6 +83,10 @@ export function graphql(source: "mutation Logout {\n  logout\n}"): (typeof docum
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "mutation Register($options: RegisterUserInput!) {\n  register(options: $options) {\n    errors {\n      field\n      message\n    }\n    user {\n      ...RegularUser\n    }\n  }\n}"): (typeof documents)["mutation Register($options: RegisterUserInput!) {\n  register(options: $options) {\n    errors {\n      field\n      message\n    }\n    user {\n      ...RegularUser\n    }\n  }\n}"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "mutation UpdatePost($input: UpdatePostInput!, $updatePostId: Int!) {\n  updatePost(input: $input, id: $updatePostId) {\n    id\n    title\n    text\n    textSnippet\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}"): (typeof documents)["mutation UpdatePost($input: UpdatePostInput!, $updatePostId: Int!) {\n  updatePost(input: $input, id: $updatePostId) {\n    id\n    title\n    text\n    textSnippet\n    votes\n    userId\n    user {\n      username\n    }\n  }\n}"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

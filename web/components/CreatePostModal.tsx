@@ -3,38 +3,35 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 
-import {
-  CreatePostDocument,
-  Post,
-  PostInput,
-  User,
-} from "@/gql/graphqlcomponents";
-import { useMe } from "@/hooks/useMecomponents";
-import { client } from "@/lib/clientcomponents";
-import useFetchPosts from "@/hooks/useFetchPostscomponents";
-import { Posts } from "@/typescomponents";
+import { Post } from "@/gql/graphqlcomponents";
+import { useDetectClickOutside } from "@/hooks/useDetectClickOutsidecomponents";
+
+interface Props {
+  isVisible: boolean;
+  isEditModal?: boolean;
+  closeModal: () => void;
+  handleClick: (post: Partial<Post>) => void;
+  userPost?: Post;
+}
 
 const initialState = {
   title: "",
   text: "",
 };
 
-const getOptimisticData = (currentData: Posts[] | undefined, post: Post) => {
-  if (currentData) {
-    let last = currentData.length - 1;
-    currentData[last].posts = currentData[last].posts.slice(0, -1);
-    return [{ posts: [post] }, ...currentData];
-  } else {
-    return [{ posts: [post] }];
-  }
-};
-
-export default function CreatePostModal() {
-  const { data } = useMe();
-  const { data: posts, mutate } = useFetchPosts();
-  const [post, setPost] = useState<Partial<Post>>(initialState);
-
-  const [isVisible, setIsVisible] = useState(false);
+export default function CreatePostModal({
+  closeModal,
+  isEditModal,
+  isVisible,
+  handleClick,
+  userPost,
+}: Props) {
+  const { ref } = useDetectClickOutside(isVisible ? close : null);
+  const [post, setPost] = useState<Partial<Post>>(
+    isEditModal
+      ? { title: userPost?.title, text: userPost?.text }
+      : initialState
+  );
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -45,96 +42,66 @@ export default function CreatePostModal() {
     });
   };
 
-  const closeModal = () => {
-    setIsVisible(false);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleClick(post);
     setPost(initialState);
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    mutate(createPost(), {
-      optimisticData: (currentData: Posts[] | undefined) => {
-        let newPost = {
-          ...post,
-          textSnippet: post?.text!,
-          votes: 0,
-          user: {
-            username: data?.me?.username,
-          },
-          createdAt: new Date().toISOString(),
-          id: Date.now(),
-        } as Post;
-        return getOptimisticData(currentData, newPost);
-      },
-      rollbackOnError: true,
-    });
+  function close() {
     closeModal();
-  };
+    setPost(initialState);
+  }
 
-  const createPost = async () => {
-    const { createPost } = await client.request(CreatePostDocument, {
-      input: post as PostInput,
-    });
-    if (!createPost.id) throw new Error();
-    return getOptimisticData(posts, createPost as Post);
-  };
-
-  if (!data?.me) return null;
+  if (!isVisible) return null;
 
   return (
-    <div className="w-full flex justify-end">
-      <button
-        onClick={() => setIsVisible(!isVisible)}
-        className="bg-primary rounded-md p-3 mb-3"
+    <div className="backdrop-blur-sm fixed left-0 top-0 w-full h-full z-10">
+      <div
+        ref={ref}
+        className="modal rounded-md p-5 bg-gray-700 absolute left-2/4 top-2/4 m-auto -translate-x-2/4 -translate-y-2/4  w-2/6 h-3/6 z-0"
       >
-        Create Post
-      </button>
-      {isVisible && (
-        <div className="backdrop-blur-sm absolute left-0 top-0 w-full h-full z-10">
-          <div className="modal rounded-md p-5 bg-gray-700 absolute left-2/4 top-2/4 m-auto -translate-x-2/4 -translate-y-2/4  w-2/6 h-3/6 z-0">
-            <button
-              onClick={closeModal}
-              className="mb-5 ml-auto outline-none border-none bg-primary w-7 h-7 flex justify-center items-center rounded-full"
-            >
-              <AiOutlineClose />
-            </button>
-            <form className="w-full mb-5" onSubmit={handleSubmit}>
-              <div className="field w-full mb-5">
-                <label>
-                  <p className="font-bold pb-2">Title</p>
-                  <input
-                    className="w-full p-3 font-light bg-primary  rounded-md outline-none"
-                    type="title"
-                    name="title"
-                    placeholder="title"
-                    onChange={handleChange}
-                    value={post.title}
-                    required={true}
-                  />
-                </label>
-              </div>
-
-              <div className="field w-full mb-5">
-                <label>
-                  <p className="font-bold pb-2">Text</p>
-                  <textarea
-                    className="w-full p-3 font-light bg-primary  rounded-md outline-none"
-                    name="text"
-                    onChange={handleChange}
-                    value={post.text}
-                    required={true}
-                    placeholder="text"
-                  ></textarea>
-                </label>
-              </div>
-
-              <button className="self-start bg-primary  py-3 px-6 rounded-md font-bold mb-5">
-                Post
-              </button>
-            </form>
+        <button
+          onClick={close}
+          className="mb-5 ml-auto outline-none border-none bg-primary w-7 h-7 flex justify-center items-center rounded-full"
+        >
+          <AiOutlineClose />
+        </button>
+        <form className="w-full mb-5" onSubmit={handleSubmit}>
+          <div className="field w-full mb-5">
+            <label>
+              <p className="font-bold pb-2">Title</p>
+              <input
+                className="w-full p-3 font-light bg-primary  rounded-md outline-none"
+                type="title"
+                name="title"
+                placeholder="title"
+                onChange={handleChange}
+                value={post.title}
+                required={true}
+              />
+            </label>
           </div>
-        </div>
-      )}
+
+          <div className="field w-full mb-5">
+            <label>
+              <p className="font-bold pb-2">Text</p>
+              <textarea
+                className="w-full p-3 font-light bg-primary  rounded-md outline-none"
+                name="text"
+                onChange={handleChange}
+                value={post.text}
+                required={true}
+                placeholder="text"
+              ></textarea>
+            </label>
+          </div>
+
+          <button className="self-start bg-primary  py-3 px-6 rounded-md font-bold mb-5">
+            {isEditModal ? "Edit Post" : "Post"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

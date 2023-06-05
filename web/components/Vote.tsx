@@ -9,7 +9,7 @@ import {
   UpvotePostDocument,
 } from "@/gql/graphqlcomponents";
 import { client } from "@/lib/clientcomponents";
-import useFetchPosts from "@/hooks/useFetchPostscomponents";
+import { useFetchPosts } from "@/hooks/useFetchPostscomponents";
 import { UPVOTE_COLOR, DOWNVOTE_COLOR } from "@/contantscomponents";
 
 interface Posts {

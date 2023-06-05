@@ -1,0 +1,13 @@
+mutation UpdatePost($input: UpdatePostInput!, $updatePostId: Int!) {
+  updatePost(input: $input, id: $updatePostId) {
+    id
+    title
+    text
+    textSnippet
+    votes
+    userId
+    user {
+      username
+    }
+  }
+}

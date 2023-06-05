@@ -7,12 +7,10 @@ import { client } from "@/lib/clientcomponents";
 const fetcher: Fetcher<{ posts: Post[] }, string> = ([query, variables]: any) =>
   client.request(query, variables);
 
-export default function useFetchPosts() {
+export function useFetchPosts() {
   const { data, error, isLoading, mutate, size, setSize } = useSWRInfinite(
-    (pageIndex: number, previousPageData: { posts: Post[] } | null) => {
-      console.log({ pageIndex, previousPageData });
+    (_, previousPageData: { posts: Post[] } | null) => {
       const posts = previousPageData?.posts;
-
       return [
         GetPostsDocument,
         { limit: 10, ...(posts && { cursor: posts[posts.length - 1].id }) },
