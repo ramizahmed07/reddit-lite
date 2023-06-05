@@ -20,7 +20,7 @@ export default function Post({ post }: { post: PostType }) {
           </p>
 
           <h2 className="mb-2 text-lg font-bold">{post.title}</h2>
-          <p className="text-reg">{post.text}</p>
+          <p className="text-reg">{post.textSnippet}</p>
         </div>
         <PostActions post={post} />
       </div>

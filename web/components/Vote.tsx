@@ -4,13 +4,13 @@ import { TbArrowBigDown, TbArrowBigUp } from "react-icons/tb";
 
 import {
   DownvotePostDocument,
-  GetPostsDocument,
   Post,
   UpvotePostDocument,
 } from "@/gql/graphqlcomponents";
 import { client } from "@/lib/clientcomponents";
 import { useFetchPosts } from "@/hooks/useFetchPostscomponents";
 import { UPVOTE_COLOR, DOWNVOTE_COLOR } from "@/contantscomponents";
+import { useFetchPost } from "@/hooks/useFetchPostcomponents";
 
 interface Posts {
   posts: Post[];
@@ -64,6 +64,7 @@ export default function Vote({
   voteStatus: string;
 }) {
   const { data: posts, mutate } = useFetchPosts();
+  const { mutate: mutatePost } = useFetchPost(postId);
 
   const upvote = async () => {
     const { upvote } = await client.request(UpvotePostDocument, {
@@ -75,6 +76,7 @@ export default function Vote({
       getVoteOptimisticData(postId, votes, voteStatus, "upvote", posts),
       false
     );
+    mutatePost();
   };
 
   const downvote = async () => {
@@ -86,6 +88,7 @@ export default function Vote({
       getVoteOptimisticData(postId, votes, voteStatus, "downvote", posts),
       false
     );
+    mutatePost();
   };
 
   return (
