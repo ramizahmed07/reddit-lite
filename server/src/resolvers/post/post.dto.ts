@@ -48,6 +48,15 @@ export class PostInput {
   text: string;
 }
 
+@InputType()
+export class UpdatePostInput {
+  @Field(() => String, { nullable: true })
+  title?: string;
+
+  @Field(() => String, { nullable: true })
+  text?: string;
+}
+
 ObjectType();
 export class Upvote {
   @Field(() => Int)

@@ -12,7 +12,7 @@ import {
 
 import { isAuth } from "../../middlewares/isAuth";
 import { MyContext } from "src/types";
-import { Post, PostInput, Vote } from "./post.dto";
+import { Post, PostInput, UpdatePostInput, Vote } from "./post.dto";
 
 @Resolver(Post)
 export class PostResolver {
@@ -105,20 +105,22 @@ export class PostResolver {
   }
 
   @Mutation((_returns) => Post)
+  @UseMiddleware(isAuth)
   async updatePost(
     @Arg("id", () => Int) id: number,
-    @Arg("title", () => String, { nullable: true }) title: string,
+    @Arg("input")
+    input: UpdatePostInput,
     @Ctx() { prisma }: MyContext
   ) {
     const post = await prisma.post.findUnique({ where: { id } });
 
     if (!post) return null;
 
-    if (typeof title !== undefined) {
+    if (input && Object.keys(input).length) {
       return prisma.post.update({
         where: { id },
         data: {
-          title,
+          ...input,
         },
       });
     }
@@ -132,11 +134,6 @@ export class PostResolver {
     @Ctx() { prisma, req }: MyContext
   ) {
     const userId = req?.session?.userId;
-    // await new Promise((res) =>
-    //   setTimeout(() => {
-    //     res(true);
-    //   }, 4000)
-    // );
     try {
       const post = await prisma.post.findUnique({ where: { id } });
       if (!post) return false;
@@ -203,7 +200,6 @@ export class PostResolver {
 
     if (upvote) status = Vote.Upvote;
     else if (downvote) status = Vote.Downvote;
-    // status = upvote
     try {
       if (status !== null) {
         if (status === Vote.Downvote) {
