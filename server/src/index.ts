@@ -14,10 +14,8 @@ import Redis from "ioredis";
 import { COOKIE_NAME, __prod__ } from "./constants";
 import { PostResolver } from "./resolvers/post/post.resolver";
 import { UserResolver } from "./resolvers/user/user.resolver";
-
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./lib/prisma";
+import { createUserLoader } from "./utils/createUserLoader";
 
 const main = async () => {
   const schema = await buildSchema({
@@ -68,7 +66,13 @@ const main = async () => {
     "/graphql",
     json(),
     expressMiddleware(server, {
-      context: ({ req, res }): any => ({ prisma, req, res, redis }),
+      context: ({ req, res }): any => ({
+        prisma,
+        req,
+        res,
+        redis,
+        userLoader: createUserLoader(),
+      }),
     })
   );
 

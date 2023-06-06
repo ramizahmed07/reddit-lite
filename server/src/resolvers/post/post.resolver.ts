@@ -22,8 +22,8 @@ export class PostResolver {
   }
 
   @FieldResolver()
-  user(@Root() { userId }: Post, @Ctx() { prisma }: MyContext) {
-    return prisma.user.findUnique({ where: { id: userId } });
+  user(@Root() { userId }: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(userId);
   }
 
   @FieldResolver()
@@ -110,11 +110,12 @@ export class PostResolver {
     @Arg("id", () => Int) id: number,
     @Arg("input")
     input: UpdatePostInput,
-    @Ctx() { prisma }: MyContext
+    @Ctx() { prisma, req }: MyContext
   ) {
     const post = await prisma.post.findUnique({ where: { id } });
 
     if (!post) return null;
+    if (post?.userId !== req?.session?.userId) return null;
 
     if (input && Object.keys(input).length) {
       return prisma.post.update({
