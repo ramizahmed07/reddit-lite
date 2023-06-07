@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { HiOutlinePencil } from "react-icons/hi";
 
@@ -33,7 +31,7 @@ const getOptimisticData = (currentData: Posts[] | undefined, post: Post) => {
 
 export default function UpdatePost({ closeMenu, post }: Props) {
   const [isVisible, setIsVisible] = useState(false);
-  const { data } = useMe();
+
   const { data: posts, mutate } = useFetchPosts();
 
   const closeModal = () => {

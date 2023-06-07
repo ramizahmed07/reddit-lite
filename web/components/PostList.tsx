@@ -3,7 +3,6 @@
 import { useFetchPosts } from "@/hooks/useFetchPostscomponents";
 import Post from "./Post";
 import CreatePost from "./CreatePost";
-import Link from "next/link";
 
 export default function PostList() {
   const { data, error, isLoading, setSize, size } = useFetchPosts();
@@ -17,11 +16,7 @@ export default function PostList() {
       {data && data.length > 0 ? (
         <>
           {data?.map((item) =>
-            item?.posts.map((post) => (
-              <Link key={post?.id} href={`/post/${post?.id}`}>
-                <Post post={post} />
-              </Link>
-            ))
+            item?.posts.map((post) => <Post key={post?.id} post={post} />)
           )}
 
           <div

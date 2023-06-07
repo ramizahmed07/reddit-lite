@@ -1,4 +1,3 @@
-import { mutate } from "swr";
 import { AiOutlineDelete } from "react-icons/ai";
 
 import { DeletePostDocument } from "@/gql/graphqlcomponents";

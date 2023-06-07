@@ -16,16 +16,19 @@ export default function PostMenu({ post }: { post: Post }) {
   const closeMenu = () => setIsVisible(false);
 
   return (
-    <div className="relative">
+    <div ref={ref} className="relative">
       <button
-        onClick={() => setIsVisible(!isVisible)}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setIsVisible(!isVisible);
+        }}
         className="hover:bg-border p-1 text-light-white rounded-sm"
       >
         <TbDots size={20} />
       </button>
       {isVisible && (
         <div
-          ref={ref}
           className="[&>button]:flex [&>button]:items-center [&>button]:text-light-white [&>button]:text-left [&>button]:border-solid [&>button]:border-0 [&>button]:border-t [&>button]:border-border 
         flex flex-col justify-start absolute left-0 top-7 shadow-[0_2px_4px_0_rgba(215,218,220,0.5)]
          rounded-[4px] z-10 bg-primary w-56 h-fit bg-orange"

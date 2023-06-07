@@ -1,5 +1,3 @@
-"use client";
-
 import { TbArrowBigDown, TbArrowBigUp } from "react-icons/tb";
 
 import {
